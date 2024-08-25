@@ -1,4 +1,4 @@
-# Welcome to Flights Service
+# Welcome to Nimbus Air Service
 
 ## Project Setup
 
@@ -16,7 +16,7 @@
   "development": {
     "username": <YOUR_DB_LOGIN_NAME>,
     "password": <YOUR_DB_PASSWORD>,
-    "database": "Railway-Search-DB",
+    "database": "Nimbus-Air-Search-DB",
     "host": "127.0.0.1",
     "dialect": "mysql"
   }
@@ -32,22 +32,22 @@ and then execute
 
 
 ## DB Design
-  - Express Table
-  - Train
-  - Station
+  - Airplane Table
+  - Flight
+  - Airport
   - City 
 
-  - A train belongs to an express but one express can be used in multiple trains
-  - A city has many stations but one station belongs to a city
-  - One station can have many trains, but a train belongs to one station
+  - A flight belongs to an airplane but one airplane can be used in multiple flights.
+  - A city has many airports but one airport belongs to a city.
+  - One airport can have many flights, but a flight belongs to one airport.
 
 
   
 ## Tables
 
     City -> id, name, created_at, updated_at
-    Station -> id, name, address, city_id, created_at, updated_at
-    Relationship -> City has many stations and Station belongs to a city (one to many)
+    Airport -> id, name, address, city_id, created_at, updated_at
+    Relationship -> City has many airports and an Airport belongs to a city (one to many relation)
 
 To start the server - 
 ```
