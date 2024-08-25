@@ -43,14 +43,12 @@ and then execute
 
   
 ## Tables
-```
+
     City -> id, name, created_at, updated_at
     Station -> id, name, address, city_id, created_at, updated_at
     Relationship -> City has many stations and Station belongs to a city (one to many)
-```
 
 To start the server - 
-
 ```
 npm start
 ```
