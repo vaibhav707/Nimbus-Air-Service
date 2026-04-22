@@ -2,7 +2,14 @@ const { StatusCodes } = require('http-status-codes');
 
 const { FlightService } = require('../services');
 const { SuccessResponse, ErrorResponse } = require('../utils/common');
+const { redis } = require('redis');
 
+const client = redis.createClient();
+client.connect();
+
+client.on("error", (err) => {
+    console.error("Redis error:", err);
+});
 /**
  * POST : /flights 
  * req-body {
@@ -44,16 +51,50 @@ async function createFlight(req, res) {
 
 async function getAllFlights(req, res) {
     try {
+        const { source, destination } = req.query;
+
+        // Apply caching ONLY for Delhi → Mumbai
+        if (source === "Delhi" && destination === "Mumbai") {
+            const cacheKey = `flights:${source}:${destination}`;
+
+            // 1. Check cache
+            const cachedData = await client.get(cacheKey);
+
+            if (cachedData) {
+                console.log("Cache hit ✅");
+                SuccessResponse.data = JSON.parse(cachedData);
+                return res
+                    .status(StatusCodes.OK)
+                    .json(SuccessResponse);
+            }
+
+            console.log("Cache miss ❌");
+
+            // 2. Fetch from DB
+            const flights = await FlightService.getAllFlights(req.query);
+
+            // 3. Store in cache (5 min expiry)
+            await client.setEx(cacheKey, 300, JSON.stringify(flights));
+
+            SuccessResponse.data = flights;
+            return res
+                .status(StatusCodes.OK)
+                .json(SuccessResponse);
+        }
+
+        // Normal flow (no cache for other routes)
         const flights = await FlightService.getAllFlights(req.query);
         SuccessResponse.data = flights;
+
         return res
-                .status(StatusCodes.CREATED)
-                .json(SuccessResponse);
+            .status(StatusCodes.OK)
+            .json(SuccessResponse);
+
     } catch(error) {
         ErrorResponse.error = error;
         return res
-                .status(error.statusCode)
-                .json(ErrorResponse);
+            .status(error.statusCode)
+            .json(ErrorResponse);
     }
 }
 
